@@ -1,0 +1,88 @@
+---
+title: "Google Review for BSA projects in PP"
+author: "Juandra"
+date: "5/30/2022"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+# Buka window chromenya
+```{r}
+library(rvest)
+library(xml2)
+library(RSelenium)
+library(lubridate)
+library(tidyverse)
+library(httr)
+set_config( config( ssl_verifypeer = 0L ) )
+            
+rmDr=rsDriver(port = 4501L,version = "2.53.1", browser=c("chrome"), chromever="101.0.4951.41")
+myclient= rmDr$client
+myclient$navigate("https://www.google.com/search?q=MILLENNIUM+CITY&rlz=1C1CHBF_enID932ID932&oq=millennium&aqs=chrome.0.69i59j69i57j46i39i175i199j46i131i175i199i433i512j0i512j69i61j69i60l2.3123j0j9&sourceid=chrome&ie=UTF-8#lrd=0x2e69e2538703db41:0x2acf26b772191e14,1,,,")
+
+#click on the AxAp9e to switch focus----------
+webEle <- myclient$findElement(using = "css",value = ".AxAp9e")
+webEle$clickElement()
+
+#simulate scroll down for several times-------------
+scroll_down_times=13
+for(i in 1 :scroll_down_times){
+    webEle$sendKeysToActiveElement(sendKeys = list(key="end"))
+  #the content needs time to load,wait 1 second every 5 scroll downs
+  Sys.sleep(2)
+}
+#loop and simulate clicking on all "click on more" elements-------------
+webEles <- myclient$findElements(using = "css",value = ".review-more-link")
+for(webEle in webEles){
+  tryCatch(webEle$clickElement(),error=function(e){print(e)}) # trycatch to prevent any error from stopping the loop
+  Sys.sleep(1)
+}
+pagesource= myclient$getPageSource()[[1]]
+#this should get you the full review, including translation and original text-
+
+reviews=read_html(pagesource) %>%
+    html_nodes(".Jtu6Td") %>%
+    html_text()
+
+#number of stars
+stars <- read_html(pagesource) %>%
+    html_node(".review-dialog-list") %>%
+    html_nodes("g-review-stars > span") %>%
+    html_attr("aria-label")
+
+#time posted
+post_time <- read_html(pagesource) %>%
+    html_node(".review-dialog-list") %>%
+    html_nodes(".dehysf") %>%
+    html_text()
+
+likes<- read_html(pagesource) %>%
+    html_node(".review-dialog-list") %>%
+    html_nodes(".dehysf") %>%
+    html_text()
+table <- data.frame(stars, reviews, post_time) 
+write.csv(table, ".csv")
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
