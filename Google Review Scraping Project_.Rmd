@@ -1,5 +1,5 @@
 ---
-title: "Google Review for BSA projects in PP"
+title: "Google Review for housing projects in PP"
 author: "Juandra"
 date: "5/30/2022"
 output: html_document
@@ -11,7 +11,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ## R Markdown
 
-# Buka window chromenya
+# Open the chrome window 
 ```{r}
 library(rvest)
 library(xml2)
